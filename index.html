@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Astronomical Events Ticker</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d12;
+      --bg-card: #13131a;
+      --bg-card2: #1a1a24;
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,255,255,0.14);
+      --text-primary: #f0f0f5;
+      --text-secondary: #888899;
+      --text-tertiary: #454558;
+      --accent: #a78bfa;
+      --accent-dim: rgba(167,139,250,0.15);
+      --moon: #f7c948;
+      --moon-dim: rgba(247,201,72,0.12);
+      --planet: #4f8ef7;
+      --planet-dim: rgba(79,142,247,0.12);
+      --meteor: #f97b6a;
+      --meteor-dim: rgba(249,123,106,0.12);
+      --eclipse: #a78bfa;
+      --eclipse-dim: rgba(167,139,250,0.15);
+      --comet: #3ecf8e;
+      --comet-dim: rgba(62,207,142,0.12);
+      --star: #f7c948;
+      --star-dim: rgba(247,201,72,0.12);
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Mono', monospace;
+      --radius: 10px;
+      --radius-lg: 14px;
+      --ticker-h: 52px;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap');
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: 14px 16px;
+      gap: 10px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-icon { font-size: 18px; color: var(--accent); }
+    .header-title { font-size: 15px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .pause-btn {
+      background: none;
+      border: 0.5px solid var(--border-hover);
+      border-radius: var(--radius);
+      padding: 4px 9px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--font);
+      transition: background 0.15s, color 0.15s;
+    }
+    .pause-btn:hover { background: var(--bg-card2); color: var(--text-primary); }
+    .pause-btn i { font-size: 13px; }
+
+    .ticker-wrap {
+      flex: 1;
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: relative;
+      min-height: 0;
+    }
+
+    .fade-left, .fade-right {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 48px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .fade-left  { left: 0;  background: linear-gradient(to right, var(--bg-card), transparent); }
+    .fade-right { right: 0; background: linear-gradient(to left,  var(--bg-card), transparent); }
+
+    .ticker-inner {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      white-space: nowrap;
+      will-change: transform;
+    }
+
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 28px;
+      height: 100%;
+      border-right: 0.5px solid var(--border);
+      flex-shrink: 0;
+      cursor: default;
+      transition: background 0.15s;
+    }
+    .ticker-item:hover { background: var(--bg-card2); }
+
+    .item-icon-wrap {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 15px;
+    }
+
+    .item-text { display: flex; flex-direction: column; gap: 1px; }
+    .item-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .item-date {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .item-days {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      flex-shrink: 0;
+      font-family: var(--mono);
+    }
+
+    .dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+      flex-shrink: 0;
+      margin: 0 4px;
+    }
+
+    .type-moon    { background: var(--moon-dim);    color: var(--moon);    }
+    .type-planet  { background: var(--planet-dim);  color: var(--planet);  }
+    .type-meteor  { background: var(--meteor-dim);  color: var(--meteor);  }
+    .type-eclipse { background: var(--eclipse-dim); color: var(--eclipse); }
+    .type-comet   { background: var(--comet-dim);   color: var(--comet);   }
+    .type-star    { background: var(--star-dim);     color: var(--star);    }
+
+    .days-soon  { background: rgba(249,123,106,0.15); color: #f97b6a; }
+    .days-week  { background: rgba(247,201,72,0.13);  color: #f7c948; }
+    .days-later { background: rgba(255,255,255,0.07); color: var(--text-secondary); }
+    .days-today { background: rgba(62,207,142,0.15); color: #3ecf8e; }
+
+    .loading-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin 1s linear infinite; display: inline-block; }
+
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-family: var(--font);
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .filter-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .filter-btn:hover:not(.active) { background: var(--bg-card2); color: var(--text-primary); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-left">
+      <i class="ti ti-telescope header-icon" aria-hidden="true"></i>
+      <span class="header-title">Astronomical events</span>
+    </div>
+    <div class="header-right">
+      <button class="pause-btn" id="pause-btn" onclick="togglePause()" aria-label="Pause ticker">
+        <i class="ti ti-player-pause" id="pause-icon" aria-hidden="true"></i>
+        <span id="pause-label">Pause</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="filter-bar" id="filter-bar"></div>
+
+  <div class="ticker-wrap" id="ticker-wrap">
+    <div class="fade-left"  aria-hidden="true"></div>
+    <div class="fade-right" aria-hidden="true"></div>
+    <div class="ticker-inner" id="ticker-inner">
+      <div class="loading-state">
+        <i class="ti ti-loader spin" aria-hidden="true"></i> Loading events…
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const EVENTS = [
+    { name: "Full moon",             date: "2026-06-11", type: "moon",    icon: "ti-moon" },
+    { name: "Mercury at aphelion",   date: "2026-06-14", type: "planet",  icon: "ti-planet" },
+    { name: "June solstice",         date: "2026-06-21", type: "star",    icon: "ti-sun" },
+    { name: "New moon",              date: "2026-06-26", type: "moon",    icon: "ti-moon-stars" },
+    { name: "Venus at greatest elongation", date: "2026-07-01", type: "planet", icon: "ti-planet" },
+    { name: "Full moon",             date: "2026-07-10", type: "moon",    icon: "ti-moon" },
+    { name: "Jupiter at opposition", date: "2026-07-14", type: "planet",  icon: "ti-planet" },
+    { name: "Delta Aquariids peak",  date: "2026-07-29", type: "meteor",  icon: "ti-meteor" },
+    { name: "New moon",              date: "2026-07-26", type: "moon",    icon: "ti-moon-stars" },
+    { name: "Total lunar eclipse",   date: "2026-08-12", type: "eclipse", icon: "ti-circle-half" },
+    { name: "Perseids meteor shower peak", date: "2026-08-13", type: "meteor", icon: "ti-meteor" },
+    { name: "Saturn at opposition",  date: "2026-08-17", type: "planet",  icon: "ti-planet" },
+    { name: "Full moon",             date: "2026-08-27", type: "moon",    icon: "ti-moon" },
+    { name: "Total solar eclipse",   date: "2026-08-12", type: "eclipse", icon: "ti-eclipse" },
+    { name: "Uranus at opposition",  date: "2026-10-19", type: "planet",  icon: "ti-planet" },
+    { name: "Orionids meteor shower peak", date: "2026-10-21", type: "meteor", icon: "ti-meteor" },
+    { name: "Leonids meteor shower peak",  date: "2026-11-17", type: "meteor", icon: "ti-meteor" },
+    { name: "Mars at opposition",    date: "2026-12-01", type: "planet",  icon: "ti-planet" },
+    { name: "Geminids meteor shower peak", date: "2026-12-13", type: "meteor", icon: "ti-meteor" },
+    { name: "December solstice",     date: "2026-12-21", type: "star",    icon: "ti-sun" },
+    { name: "Neptune at opposition", date: "2026-09-05", type: "planet",  icon: "ti-planet" },
+    { name: "Draconids meteor shower",date: "2026-10-08", type: "meteor", icon: "ti-meteor" },
+    { name: "Halley's Comet perihelion approach", date: "2026-07-28", type: "comet", icon: "ti-comet" },
+  ];
+
+  const TYPE_LABELS = {
+    moon: "Moon", planet: "Planets", meteor: "Meteors",
+    eclipse: "Eclipses", comet: "Comets", star: "Solar"
+  };
+
+  const ALL_TYPES = [...new Set(EVENTS.map(e => e.type))];
+
+  let activeFilters = new Set(ALL_TYPES);
+  let paused = false;
+  let animationId = null;
+  let tickerX = 0;
+  let totalWidth = 0;
+  let speed = 0.6;
+  let items = [];
+
+  function daysUntil(dateStr) {
+    const now = new Date();
+    const target = new Date(dateStr + 'T00:00:00');
+    const diff = Math.ceil((target - now) / 86400000);
+    return diff;
+  }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function daysLabel(n) {
+    if (n < 0)  return 'Past';
+    if (n === 0) return 'Today';
+    if (n === 1) return 'Tomorrow';
+    return `In ${n}d`;
+  }
+
+  function daysCls(n) {
+    if (n < 0)  return 'days-later';
+    if (n === 0) return 'days-today';
+    if (n <= 3)  return 'days-soon';
+    if (n <= 7)  return 'days-week';
+    return 'days-later';
+  }
+
+  function buildFilterBar() {
+    const bar = document.getElementById('filter-bar');
+    bar.innerHTML = '';
+    ALL_TYPES.forEach(type => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-btn active';
+      btn.dataset.type = type;
+      btn.textContent = TYPE_LABELS[type] || type;
+      btn.onclick = () => toggleFilter(type, btn);
+      bar.appendChild(btn);
+    });
+  }
+
+  function toggleFilter(type, btn) {
+    if (activeFilters.has(type)) {
+      if (activeFilters.size === 1) return;
+      activeFilters.delete(type);
+      btn.classList.remove('active');
+    } else {
+      activeFilters.add(type);
+      btn.classList.add('active');
+    }
+    buildTicker();
+  }
+
+  function buildTicker() {
+    const inner = document.getElementById('ticker-inner');
+    const filtered = EVENTS
+      .filter(e => activeFilters.has(e.type))
+      .map(e => ({ ...e, days: daysUntil(e.date) }))
+      .sort((a, b) => a.days - b.days);
+
+    if (!filtered.length) {
+      inner.innerHTML = '<div class="loading-state">No events match the selected filters.</div>';
+      return;
+    }
+
+    inner.innerHTML = '';
+    items = [];
+
+    const doubled = [...filtered, ...filtered];
+    doubled.forEach((ev, i) => {
+      const el = document.createElement('div');
+      el.className = 'ticker-item';
+      el.innerHTML = `
+        <div class="item-icon-wrap type-${ev.type}">
+          <i class="ti ${ev.icon}" aria-hidden="true"></i>
+        </div>
+        <div class="item-text">
+          <span class="item-name">${ev.name}</span>
+          <span class="item-date">${formatDate(ev.date)}</span>
+        </div>
+        <div class="dot" aria-hidden="true"></div>
+        <div class="item-days ${daysCls(ev.days)}">${daysLabel(ev.days)}</div>
+      `;
+      inner.appendChild(el);
+      if (i < filtered.length) items.push(el);
+    });
+
+    tickerX = 0;
+    inner.style.transform = 'translateX(0px)';
+
+    requestAnimationFrame(() => {
+      totalWidth = items.reduce((sum, el) => sum + el.offsetWidth, 0);
+    });
+  }
+
+  function tick() {
+    if (!paused) {
+      tickerX -= speed;
+      if (Math.abs(tickerX) >= totalWidth) {
+        tickerX = 0;
+      }
+      document.getElementById('ticker-inner').style.transform = `translateX(${tickerX}px)`;
+    }
+    animationId = requestAnimationFrame(tick);
+  }
+
+  function togglePause() {
+    paused = !paused;
+    document.getElementById('pause-icon').className = paused ? 'ti ti-player-play' : 'ti ti-player-pause';
+    document.getElementById('pause-label').textContent = paused ? 'Resume' : 'Pause';
+  }
+
+  buildFilterBar();
+  buildTicker();
+  tick();
+  </script>
+</body>
+</html>
