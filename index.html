@@ -3,400 +3,322 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Astronomical Events Ticker</title>
+  <title>Rocket Launch Tracker</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #0d0d12;
-      --bg-card: #13131a;
-      --bg-card2: #1a1a24;
-      --border: rgba(255,255,255,0.08);
-      --border-hover: rgba(255,255,255,0.14);
-      --text-primary: #f0f0f5;
-      --text-secondary: #888899;
-      --text-tertiary: #454558;
-      --accent: #a78bfa;
-      --accent-dim: rgba(167,139,250,0.15);
-      --moon: #f7c948;
-      --moon-dim: rgba(247,201,72,0.12);
-      --planet: #4f8ef7;
-      --planet-dim: rgba(79,142,247,0.12);
-      --meteor: #f97b6a;
-      --meteor-dim: rgba(249,123,106,0.12);
-      --eclipse: #a78bfa;
-      --eclipse-dim: rgba(167,139,250,0.15);
-      --comet: #3ecf8e;
-      --comet-dim: rgba(62,207,142,0.12);
-      --star: #f7c948;
-      --star-dim: rgba(247,201,72,0.12);
-      --font: 'Inter', system-ui, -apple-system, sans-serif;
-      --mono: 'JetBrains Mono', 'Fira Mono', monospace;
-      --radius: 10px;
-      --radius-lg: 14px;
-      --ticker-h: 52px;
+      --bg: transparent; --bg-card: rgba(13,13,18,0.75); --bg-card2: rgba(26,26,36,0.75);
+      --border: rgba(255,255,255,0.08); --border-hover: rgba(255,255,255,0.14);
+      --text-primary: #f0f0f5; --text-secondary: #888899; --text-tertiary: #454558;
+      --accent: #4f8ef7; --accent-dim: rgba(79,142,247,0.15);
+      --go: #3ecf8e; --go-dim: rgba(62,207,142,0.12);
+      --tbd: #f7b84f; --tbd-dim: rgba(247,184,79,0.12);
+      --hold: #f75f5f; --hold-dim: rgba(247,95,95,0.12);
+      --font: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --radius: 10px; --radius-lg: 14px;
     }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap');
+    html, body { height: 100%; background: transparent; color: var(--text-primary); font-family: var(--font); font-size: 20px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    body { padding: 8px; overflow-x: hidden; }
 
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap');
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .header-icon { font-size: 13px; color: var(--accent); }
+    .header-title { font-size: 28px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; white-space: nowrap; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .updated { font-size: 8px; color: var(--text-tertiary); }
+    .refresh-btn { background: none; border: 0.5px solid var(--border-hover); border-radius: var(--radius); padding: 4px 10px; font-size: 8px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: var(--font); transition: background 0.15s, color 0.15s; }
+    .refresh-btn:hover { background: var(--bg-card2); color: var(--text-primary); }
+    .refresh-btn i { font-size: 9px; }
 
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text-primary);
-      font-family: var(--font);
-      -webkit-font-smoothing: antialiased;
-      overflow: hidden;
-    }
+    /* Next card */
+    .next-card { background: var(--bg-card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 8px; margin-bottom: 6px; position: relative; }
+    .next-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: var(--accent); opacity: 0.7; }
+    .next-eyebrow { font-size: 8px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+    .next-name { font-size: 30px; font-weight: 600; color: var(--text-primary); line-height: 1.3; margin-bottom: 3px; letter-spacing: -0.01em; }
+    .next-sub { font-size: 24px; color: var(--text-secondary); margin-bottom: 18px; }
 
-    body {
-      display: flex;
-      flex-direction: column;
-      padding: 14px 16px;
-      gap: 10px;
-    }
+    /* Countdown */
+    .countdown { display: flex; gap: 0; margin-bottom: 10px; align-items: flex-start; }
+    .cd-unit { text-align: center; min-width: 44px; }
+    .cd-num { font-family: var(--mono); font-size: 28px; font-weight: 600; color: var(--text-primary); line-height: 1; letter-spacing: -0.02em; }
+    .cd-label { font-size: 8px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 3px; }
+    .cd-colon { font-family: var(--mono); font-size: 15px; font-weight: 400; color: var(--text-tertiary); padding: 0 2px; line-height: 1; margin-top: 1px; }
 
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
-    }
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .header-icon { font-size: 36px; color: var(--accent); }
-    .header-title { font-size: 34px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; }
-    .header-right { display: flex; align-items: center; gap: 8px; }
-    .pause-btn {
-      background: none;
-      border: 0.5px solid var(--border-hover);
-      border-radius: var(--radius);
-      padding: 6px 12px;
-      font-size: 21px;
-      color: var(--text-secondary);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-family: var(--font);
-      transition: background 0.15s, color 0.15s;
-    }
-    .pause-btn:hover { background: var(--bg-card2); color: var(--text-primary); }
-    .pause-btn i { font-size: 22px; }
+    /* Meta chips */
+    .meta-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .meta-chip { display: flex; align-items: center; gap: 5px; font-size: 20px; color: var(--text-secondary); background: var(--bg-card2); border: 0.5px solid var(--border); border-radius: 20px; padding: 2px 6px; }
+    .meta-chip i { font-size: 21px; }
+    .status-pip { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .pip-go      { background: var(--go); box-shadow: 0 0 5px var(--go); }
+    .pip-tbd     { background: var(--tbd); }
+    .pip-hold    { background: var(--hold); }
+    .pip-success { background: var(--go); box-shadow: 0 0 5px var(--go); }
+    .pip-tgo     { background: var(--text-tertiary); }
 
-    .ticker-wrap {
-      flex: 1;
-      background: var(--bg-card);
-      border: 0.5px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      position: relative;
-      min-height: 0;
-    }
+    /* Detail pills */
+    .detail-grid { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+    .detail-pill { display: flex; align-items: center; gap: 5px; font-size: 18px; color: var(--text-secondary); background: var(--bg-card2); border: 0.5px solid var(--border); border-radius: 20px; padding: 2px 6px; }
+    .detail-pill i { font-size: 19px; }
+    .detail-pill strong { color: var(--text-primary); font-weight: 500; }
 
-    .fade-left, .fade-right {
-      position: absolute;
-      top: 0; bottom: 0;
-      width: 48px;
-      z-index: 2;
-      pointer-events: none;
-    }
-    .fade-left  { left: 0;  background: linear-gradient(to right, var(--bg-card), transparent); }
-    .fade-right { right: 0; background: linear-gradient(to left,  var(--bg-card), transparent); }
+    /* Mission description */
+    .mission-desc { font-size: 18px; color: var(--text-secondary); line-height: 1.6; margin-top: 12px; padding-top: 12px; border-top: 0.5px solid var(--border); }
 
-    .ticker-inner {
-      display: flex;
-      align-items: center;
-      height: 100%;
-      white-space: nowrap;
-      will-change: transform;
-    }
 
-    .ticker-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 0 28px;
-      height: 100%;
-      border-right: 0.5px solid var(--border);
-      flex-shrink: 0;
-      cursor: default;
-      transition: background 0.15s;
-    }
-    .ticker-item:hover { background: var(--bg-card2); }
+    /* Section label */
+    .section-label { font-size: 18px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 8px; }
 
-    .item-icon-wrap {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      font-size: 31px;
-    }
+    /* Launch list rows */
+    .launch-list { display: flex; flex-direction: column; gap: 10px; }
+    .launch-row { background: var(--bg-card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 5px 8px; display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 12px; transition: border-color 0.15s; }
+    .launch-row:hover { border-color: var(--border-hover); }
+    .date-col { text-align: center; }
+    .date-day { font-size: 20px; font-weight: 600; color: var(--text-primary); line-height: 1; font-variant-numeric: tabular-nums; }
+    .date-mon { font-size: 20px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.07em; }
+    .row-name { font-size: 24px; font-weight: 500; color: var(--text-primary); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row-sub  { font-size: 22px; color: var(--text-tertiary); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row-right { text-align: right; flex-shrink: 0; }
+    .row-time { font-family: var(--mono); font-size: 24px; color: var(--text-secondary); }
+    .badge { display: inline-block; font-size: 24px; font-weight: 600; padding: 4px 12px; border-radius: 20px; margin-top: 3px; letter-spacing: 0.03em; }
+    .badge-go      { background: var(--go-dim);   color: var(--go); }
+    .badge-tbd     { background: var(--tbd-dim);  color: var(--tbd); }
+    .badge-hold    { background: var(--hold-dim); color: var(--hold); }
+    .badge-success { background: var(--go-dim);   color: var(--go); }
+    .badge-tgo     { background: var(--bg-card2); color: var(--text-tertiary); }
 
-    .item-text { display: flex; flex-direction: column; gap: 2px; }
-    .item-name { font-size: 29px; font-weight: 500; color: var(--text-primary); }
-    .item-date {
-      font-family: var(--mono);
-      font-size: 21px;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-    .item-days {
-      font-size: 21px;
-      font-weight: 600;
-      padding: 4px 14px;
-      border-radius: 20px;
-      flex-shrink: 0;
-      font-family: var(--mono);
-    }
+    /* States */
+    .state-box { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
+    .state-box i { font-size: 20px; margin-bottom: 6px; display: block; }
+    .state-box p { font-size: 10px; }
+    .state-box small { font-size: 8px; color: var(--text-tertiary); margin-top: 4px; display: block; }
 
-    .dot {
-      width: 4px; height: 4px;
-      border-radius: 50%;
-      background: var(--text-tertiary);
-      flex-shrink: 0;
-      margin: 0 4px;
-    }
-
-    .type-moon    { background: var(--moon-dim);    color: var(--moon);    }
-    .type-planet  { background: var(--planet-dim);  color: var(--planet);  }
-    .type-meteor  { background: var(--meteor-dim);  color: var(--meteor);  }
-    .type-eclipse { background: var(--eclipse-dim); color: var(--eclipse); }
-    .type-comet   { background: var(--comet-dim);   color: var(--comet);   }
-    .type-star    { background: var(--star-dim);     color: var(--star);    }
-
-    .days-soon  { background: rgba(249,123,106,0.15); color: #f97b6a; }
-    .days-week  { background: rgba(247,201,72,0.13);  color: #f7c948; }
-    .days-later { background: rgba(255,255,255,0.07); color: var(--text-secondary); }
-    .days-today { background: rgba(62,207,142,0.15); color: #3ecf8e; }
-
-    .loading-state {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      gap: 8px;
-      font-size: 17px;
-      color: var(--text-secondary);
-    }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .spin { animation: spin 1s linear infinite; display: inline-block; }
-
-    .filter-bar {
-      display: flex;
-      gap: 6px;
-      flex-shrink: 0;
-      flex-wrap: wrap;
-    }
-    .filter-btn {
-      background: var(--bg-card);
-      border: 0.5px solid var(--border);
-      border-radius: 20px;
-      padding: 6px 16px;
-      font-size: 21px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      cursor: pointer;
-      font-family: var(--font);
-      transition: background 0.15s, border-color 0.15s, color 0.15s;
-    }
-    .filter-btn.active {
-      background: var(--accent-dim);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    .filter-btn:hover:not(.active) { background: var(--bg-card2); color: var(--text-primary); }
+    .spin { display: inline-block; animation: spin 1s linear infinite; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 2px; }
   </style>
 </head>
 <body>
-
   <div class="header">
     <div class="header-left">
-      <i class="ti ti-telescope header-icon" aria-hidden="true"></i>
-      <span class="header-title">Astronomical events</span>
+      <i class="ti ti-rocket header-icon" aria-hidden="true"></i>
+      <span class="header-title">Rocket launches</span>
     </div>
     <div class="header-right">
-      <button class="pause-btn" id="pause-btn" onclick="togglePause()" aria-label="Pause ticker">
-        <i class="ti ti-player-pause" id="pause-icon" aria-hidden="true"></i>
-        <span id="pause-label">Pause</span>
+      <span class="updated" id="updated-time"></span>
+      <button class="refresh-btn" onclick="loadLaunches(true)" aria-label="Refresh">
+        <i class="ti ti-refresh" aria-hidden="true"></i> Refresh
       </button>
     </div>
   </div>
-
-  <div class="filter-bar" id="filter-bar"></div>
-
-  <div class="ticker-wrap" id="ticker-wrap">
-    <div class="fade-left"  aria-hidden="true"></div>
-    <div class="fade-right" aria-hidden="true"></div>
-    <div class="ticker-inner" id="ticker-inner">
-      <div class="loading-state">
-        <i class="ti ti-loader spin" aria-hidden="true"></i> Loading events…
-      </div>
-    </div>
+  <div id="content">
+    <div class="state-box"><i class="ti ti-loader spin"></i><p>Loading launches…</p></div>
   </div>
 
-  <script>
-  const EVENTS = [
-    { name: "Full moon",             date: "2026-06-11", type: "moon",    icon: "ti-moon" },
-    { name: "Mercury at aphelion",   date: "2026-06-14", type: "planet",  icon: "ti-planet" },
-    { name: "June solstice",         date: "2026-06-21", type: "star",    icon: "ti-sun" },
-    { name: "New moon",              date: "2026-06-26", type: "moon",    icon: "ti-moon-stars" },
-    { name: "Venus at greatest elongation", date: "2026-07-01", type: "planet", icon: "ti-planet" },
-    { name: "Full moon",             date: "2026-07-10", type: "moon",    icon: "ti-moon" },
-    { name: "Jupiter at opposition", date: "2026-07-14", type: "planet",  icon: "ti-planet" },
-    { name: "Delta Aquariids peak",  date: "2026-07-29", type: "meteor",  icon: "ti-meteor" },
-    { name: "New moon",              date: "2026-07-26", type: "moon",    icon: "ti-moon-stars" },
-    { name: "Total lunar eclipse",   date: "2026-08-12", type: "eclipse", icon: "ti-circle-half" },
-    { name: "Perseids meteor shower peak", date: "2026-08-13", type: "meteor", icon: "ti-meteor" },
-    { name: "Saturn at opposition",  date: "2026-08-17", type: "planet",  icon: "ti-planet" },
-    { name: "Full moon",             date: "2026-08-27", type: "moon",    icon: "ti-moon" },
-    { name: "Total solar eclipse",   date: "2026-08-12", type: "eclipse", icon: "ti-eclipse" },
-    { name: "Uranus at opposition",  date: "2026-10-19", type: "planet",  icon: "ti-planet" },
-    { name: "Orionids meteor shower peak", date: "2026-10-21", type: "meteor", icon: "ti-meteor" },
-    { name: "Leonids meteor shower peak",  date: "2026-11-17", type: "meteor", icon: "ti-meteor" },
-    { name: "Mars at opposition",    date: "2026-12-01", type: "planet",  icon: "ti-planet" },
-    { name: "Geminids meteor shower peak", date: "2026-12-13", type: "meteor", icon: "ti-meteor" },
-    { name: "December solstice",     date: "2026-12-21", type: "star",    icon: "ti-sun" },
-    { name: "Neptune at opposition", date: "2026-09-05", type: "planet",  icon: "ti-planet" },
-    { name: "Draconids meteor shower",date: "2026-10-08", type: "meteor", icon: "ti-meteor" },
-    { name: "Halley's Comet perihelion approach", date: "2026-07-28", type: "comet", icon: "ti-comet" },
-  ];
-
-  const TYPE_LABELS = {
-    moon: "Moon", planet: "Planets", meteor: "Meteors",
-    eclipse: "Eclipses", comet: "Comets", star: "Solar"
-  };
-
-  const ALL_TYPES = [...new Set(EVENTS.map(e => e.type))];
-
-  let activeFilters = new Set(ALL_TYPES);
-  let paused = false;
-  let animationId = null;
-  let tickerX = 0;
-  let totalWidth = 0;
-  let speed = 0.3;
-  let items = [];
-
-  function daysUntil(dateStr) {
-    const now = new Date();
-    const target = new Date(dateStr + 'T00:00:00');
-    const diff = Math.ceil((target - now) / 86400000);
-    return diff;
+<script>
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function pad2(n) { return String(n).padStart(2,'0'); }
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return {
+      day:  d.getUTCDate(),
+      mon:  d.toLocaleString('en-US',{month:'short',timeZone:'UTC'}),
+      time: d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'UTC',hour12:false})+' UTC',
+      full: d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',timeZone:'UTC'})
+    };
+  }
+  function timeAgo(iso) {
+    const days = Math.floor((Date.now()-new Date(iso))/86400000);
+    if (days===0) return 'Today';
+    if (days===1) return 'Yesterday';
+    if (days<30)  return days+'d ago';
+    return Math.floor(days/30)+'mo ago';
   }
 
-  function formatDate(dateStr) {
-    const d = new Date(dateStr + 'T00:00:00');
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  // RocketLaunch.Live result field: -1=upcoming, 1=success, 0=failure, 2=partial, 3=inflight
+  function rlStatus(l) {
+    if (l.result===1)  return {label:'Success',   cls:'success'};
+    if (l.result===0)  return {label:'Failure',   cls:'hold'};
+    if (l.result===2)  return {label:'Partial',   cls:'hold'};
+    if (l.result===3)  return {label:'In flight', cls:'go'};
+    if (l.t0||l.win_open) return {label:'Scheduled',cls:'go'};
+    return                    {label:'TBD',        cls:'tbd'};
   }
 
-  function daysLabel(n) {
-    if (n < 0)  return 'Past';
-    if (n === 0) return 'Today';
-    if (n === 1) return 'Tomorrow';
-    return `In ${n}d`;
+  function buildPills(l) {
+    const pills = [];
+    const loc = l.pad?.location;
+    const site = [loc?.name, loc?.statename, loc?.country].filter(Boolean).join(', ');
+    const tags = (l.tags||[]).map(t=>t.text).filter(t=>t!=='Suborbital').slice(0,2);
+    if (site) pills.push(`<div class="detail-pill"><i class="ti ti-map-pin"></i>${esc(site)}</div>`);
+    tags.forEach(t=>pills.push(`<div class="detail-pill"><i class="ti ti-tag"></i>${esc(t)}</div>`));
+    return pills.length ? `<div class="detail-grid">${pills.join('')}</div>` : '';
   }
 
-  function daysCls(n) {
-    if (n < 0)  return 'days-later';
-    if (n === 0) return 'days-today';
-    if (n <= 3)  return 'days-soon';
-    if (n <= 7)  return 'days-week';
-    return 'days-later';
+  let cdInterval = null, nextMs = null;
+  function updateCountdown() {
+    if (!nextMs) return;
+    const diff = Math.max(nextMs-Date.now(),0);
+    const d=Math.floor(diff/86400000), h=Math.floor(diff%86400000/3600000),
+          m=Math.floor(diff%3600000/60000), s=Math.floor(diff%60000/1000);
+    const g=id=>document.getElementById(id);
+    if(g('cd-days')) g('cd-days').textContent=pad2(d);
+    if(g('cd-hrs'))  g('cd-hrs').textContent=pad2(h);
+    if(g('cd-min'))  g('cd-min').textContent=pad2(m);
+    if(g('cd-sec'))  g('cd-sec').textContent=pad2(s);
   }
 
-  function buildFilterBar() {
-    const bar = document.getElementById('filter-bar');
-    bar.innerHTML = '';
-    ALL_TYPES.forEach(type => {
-      const btn = document.createElement('button');
-      btn.className = 'filter-btn active';
-      btn.dataset.type = type;
-      btn.textContent = TYPE_LABELS[type] || type;
-      btn.onclick = () => toggleFilter(type, btn);
-      bar.appendChild(btn);
-    });
-  }
+  const RLL = 'https://fdo.rocketlaunch.live/json/launches/next/5';
+  const PROXY = u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u);
+  const CACHE_KEY = 'rll_v2';
+  const CACHE_TTL = 10*60*1000;
 
-  function toggleFilter(type, btn) {
-    if (activeFilters.has(type)) {
-      if (activeFilters.size === 1) return;
-      activeFilters.delete(type);
-      btn.classList.remove('active');
-    } else {
-      activeFilters.add(type);
-      btn.classList.add('active');
+  async function fetchData() {
+    for (const url of [RLL, PROXY(RLL)]) {
+      try {
+        const r = await fetch(url);
+        if (r.ok) return await r.json();
+      } catch(e) {}
     }
-    buildTicker();
+    throw new Error('All sources unreachable');
   }
 
-  function buildTicker() {
-    const inner = document.getElementById('ticker-inner');
-    const filtered = EVENTS
-      .filter(e => activeFilters.has(e.type))
-      .map(e => ({ ...e, days: daysUntil(e.date) }))
-      .sort((a, b) => a.days - b.days);
+  async function loadLaunches(force=false) {
+    const el = document.getElementById('content');
 
-    if (!filtered.length) {
-      inner.innerHTML = '<div class="loading-state">No events match the selected filters.</div>';
+    if (!force) {
+      try {
+        const c = JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
+        if (c && Date.now()-c.ts < CACHE_TTL) { render(c.data); return; }
+      } catch(e) {}
+    }
+
+    el.innerHTML = '<div class="state-box"><i class="ti ti-loader spin"></i><p>Loading launches…</p></div>';
+    if (cdInterval) { clearInterval(cdInterval); cdInterval=null; }
+
+    try {
+      const data = await fetchData();
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), data})); } catch(e) {}
+      render(data);
+    } catch(err) {
+      // Show stale cache if available
+      try {
+        const c = JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
+        if (c) {
+          render(c.data);
+          document.getElementById('updated-time').textContent = 'Cached '+Math.round((Date.now()-c.ts)/60000)+'m ago';
+          return;
+        }
+      } catch(e) {}
+      el.innerHTML = `<div class="state-box"><i class="ti ti-wifi-off"></i><p>Could not load launch data.</p><small>${esc(err.message)}</small><br><button class="refresh-btn" onclick="loadLaunches(true)" style="margin:10px auto 0"><i class="ti ti-refresh"></i> Retry</button></div>`;
+    }
+  }
+
+  function render(data) {
+    const el = document.getElementById('content');
+    if (cdInterval) { clearInterval(cdInterval); cdInterval=null; }
+
+    const now     = Date.now();
+    const results = data.result || [];
+
+    const upcoming = results.filter(l => {
+      if (l.result===1||l.result===0||l.result===2) return false;
+      const t0ms = l.t0 ? new Date(l.t0).getTime() : null;
+      if (t0ms && t0ms < now - 30*60*1000) return false;
+      return true;
+    });
+
+    if (!upcoming.length && !past.length) {
+      el.innerHTML='<div class="state-box"><i class="ti ti-calendar-off"></i><p>No launch data found.</p></div>';
       return;
     }
 
-    inner.innerHTML = '';
-    items = [];
+    const first = upcoming[0]||null;
+    const rest  = upcoming.slice(1);
 
-    const doubled = [...filtered, ...filtered];
-    doubled.forEach((ev, i) => {
-      const el = document.createElement('div');
-      el.className = 'ticker-item';
-      el.innerHTML = `
-        <div class="item-icon-wrap type-${ev.type}">
-          <i class="ti ${ev.icon}" aria-hidden="true"></i>
-        </div>
-        <div class="item-text">
-          <span class="item-name">${ev.name}</span>
-          <span class="item-date">${formatDate(ev.date)}</span>
-        </div>
-        <div class="dot" aria-hidden="true"></div>
-        <div class="item-days ${daysCls(ev.days)}">${daysLabel(ev.days)}</div>
-      `;
-      inner.appendChild(el);
-      if (i < filtered.length) items.push(el);
-    });
-
-    tickerX = 0;
-    inner.style.transform = 'translateX(0px)';
-
-    requestAnimationFrame(() => {
-      totalWidth = items.reduce((sum, el) => sum + el.offsetWidth, 0);
-    });
-  }
-
-  function tick() {
-    if (!paused) {
-      tickerX -= speed;
-      if (Math.abs(tickerX) >= totalWidth) {
-        tickerX = 0;
-      }
-      document.getElementById('ticker-inner').style.transform = `translateX(${tickerX}px)`;
+    if (first) {
+      const t0 = first.t0||first.win_open;
+      nextMs = t0 ? new Date(t0).getTime() : null;
     }
-    animationId = requestAnimationFrame(tick);
+
+    let html = '';
+
+    // ── Next launch ──
+    if (first) {
+      const st  = rlStatus(first);
+      const t0  = first.t0||first.win_open;
+      const tbd = !first.t0;
+      const ag  = esc(first.provider?.name||'');
+      const rk  = esc(first.vehicle?.name||'');
+      const mis = esc(first.missions?.[0]?.name||'');
+      const dsc = esc(first.launch_description||first.missions?.[0]?.description||'');
+      html += `<div class="next-card">
+        <div class="next-eyebrow">Next launch</div>
+        <div class="next-name">${esc(first.name)}</div>
+        <div class="next-sub">${[ag,rk].filter(Boolean).join(' · ')}</div>
+        <div class="countdown">
+          <div class="cd-unit"><div class="cd-num" id="cd-days">--</div><div class="cd-label">days</div></div>
+          <div class="cd-colon">:</div>
+          <div class="cd-unit"><div class="cd-num" id="cd-hrs">--</div><div class="cd-label">hrs</div></div>
+          <div class="cd-colon">:</div>
+          <div class="cd-unit"><div class="cd-num" id="cd-min">--</div><div class="cd-label">min</div></div>
+          <div class="cd-colon">:</div>
+          <div class="cd-unit"><div class="cd-num" id="cd-sec">--</div><div class="cd-label">sec</div></div>
+        </div>
+        ${tbd?'<div style="font-size:13px;color:var(--text-tertiary);margin-bottom:10px">Exact time TBD</div>':''}
+        <div class="meta-row">
+          <div class="meta-chip"><span class="status-pip pip-${st.cls}"></span>${st.label}</div>
+          ${mis&&mis!==esc(first.name)?`<div class="meta-chip"><i class="ti ti-satellite"></i>${mis}</div>`:''}
+        </div>
+        ${buildPills(first)}
+        ${dsc?`<div class="mission-desc">${dsc}</div>`:''}
+      </div>`;
+    }
+
+
+
+    // ── Upcoming list ──
+    if (rest.length) {
+      html += '<div class="section-label">Upcoming</div><div class="launch-list">';
+      rest.forEach(l=>{
+        const t0 = l.t0||l.win_open;
+        const dt = t0 ? formatDate(t0) : null;
+        const st = rlStatus(l);
+        html += `<div class="launch-row">
+          <div class="date-col">
+            <div class="date-day">${dt?dt.day:'—'}</div>
+            <div class="date-mon">${dt?dt.mon:''}</div>
+          </div>
+          <div style="min-width:0">
+            <div class="row-name">${esc(l.name)}</div>
+            <div class="row-sub">${[esc(l.provider?.name||''),esc(l.vehicle?.name||'')].filter(Boolean).join(' · ')}</div>
+          </div>
+          <div class="row-right">
+            <div class="row-time">${l.t0?dt.time:'TBD'}</div>
+            <div class="badge badge-${st.cls}">${st.label}</div>
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    }
+
+    html += '<div style="font-size:11px;color:var(--text-tertiary);text-align:right;margin-top:8px">Data by RocketLaunch.Live</div>';
+
+    el.innerHTML = html;
+    updateCountdown();
+    cdInterval = setInterval(updateCountdown, 1000);
+    document.getElementById('updated-time').textContent =
+      'Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
   }
 
-  function togglePause() {
-    paused = !paused;
-    document.getElementById('pause-icon').className = paused ? 'ti ti-player-play' : 'ti ti-player-pause';
-    document.getElementById('pause-label').textContent = paused ? 'Resume' : 'Pause';
-  }
-
-  buildFilterBar();
-  buildTicker();
-  tick();
-  </script>
+  loadLaunches();
+  setInterval(()=>loadLaunches(true), 10*60*1000);
+</script>
 </body>
 </html>
