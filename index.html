@@ -8,9 +8,9 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: transparent; --bg-card: rgba(13,13,18,0.75); --bg-card2: rgba(26,26,36,0.75);
+      --bg: transparent; --bg-card: rgba(13,13,18,0.25); --bg-card2: rgba(26,26,36,0.25);
       --border: rgba(255,255,255,0.08); --border-hover: rgba(255,255,255,0.14);
-      --text-primary: #f0f0f5; --text-secondary: #888899; --text-tertiary: #454558;
+      --text-primary: #ffffff; --text-secondary: #b0b0c8; --text-tertiary: #454558;
       --accent: #4f8ef7; --accent-dim: rgba(79,142,247,0.15);
       --go: #3ecf8e; --go-dim: rgba(62,207,142,0.12);
       --tbd: #f7b84f; --tbd-dim: rgba(247,184,79,0.12);
@@ -26,7 +26,7 @@
     .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
     .header-left { display: flex; align-items: center; gap: 14px; }
     .header-icon { font-size: 13px; color: var(--accent); }
-    .header-title { font-size: 28px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; white-space: nowrap; }
+    .header-title { font-size: 28px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; white-space: nowrap; }
     .header-right { display: flex; align-items: center; gap: 10px; }
     .updated { font-size: 8px; color: var(--text-tertiary); }
     .refresh-btn { background: none; border: 0.5px solid var(--border-hover); border-radius: var(--radius); padding: 4px 10px; font-size: 8px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: var(--font); transition: background 0.15s, color 0.15s; }
@@ -37,13 +37,13 @@
     .next-card { background: var(--bg-card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 8px; margin-bottom: 6px; position: relative; }
     .next-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: var(--accent); opacity: 0.7; }
     .next-eyebrow { font-size: 8px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
-    .next-name { font-size: 30px; font-weight: 600; color: var(--text-primary); line-height: 1.3; margin-bottom: 3px; letter-spacing: -0.01em; }
+    .next-name { font-size: 30px; font-weight: 700; color: var(--text-primary); line-height: 1.3; margin-bottom: 3px; letter-spacing: -0.01em; }
     .next-sub { font-size: 24px; color: var(--text-secondary); margin-bottom: 18px; }
 
     /* Countdown */
     .countdown { display: flex; gap: 0; margin-bottom: 10px; align-items: flex-start; }
     .cd-unit { text-align: center; min-width: 44px; }
-    .cd-num { font-family: var(--mono); font-size: 28px; font-weight: 600; color: var(--text-primary); line-height: 1; letter-spacing: -0.02em; }
+    .cd-num { font-family: var(--mono); font-size: 28px; font-weight: 700; color: var(--text-primary); line-height: 1; letter-spacing: -0.02em; }
     .cd-label { font-size: 8px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 3px; }
     .cd-colon { font-family: var(--mono); font-size: 15px; font-weight: 400; color: var(--text-tertiary); padding: 0 2px; line-height: 1; margin-top: 1px; }
 
@@ -76,9 +76,9 @@
     .launch-row { background: var(--bg-card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 5px 8px; display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 12px; transition: border-color 0.15s; }
     .launch-row:hover { border-color: var(--border-hover); }
     .date-col { text-align: center; }
-    .date-day { font-size: 20px; font-weight: 600; color: var(--text-primary); line-height: 1; font-variant-numeric: tabular-nums; }
+    .date-day { font-size: 20px; font-weight: 700; color: var(--text-primary); line-height: 1; font-variant-numeric: tabular-nums; }
     .date-mon { font-size: 20px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.07em; }
-    .row-name { font-size: 24px; font-weight: 500; color: var(--text-primary); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row-name { font-size: 24px; font-weight: 700; color: var(--text-primary); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .row-sub  { font-size: 22px; color: var(--text-tertiary); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .row-right { text-align: right; flex-shrink: 0; }
     .row-time { font-family: var(--mono); font-size: 24px; color: var(--text-secondary); }
